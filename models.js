@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, writeFileSync} from "node:fs";
 import { randomUUID, createHash } from "node:crypto";
 import "dotenv/config";
-import { handleErrors } from "./utils/handleError.js";
+import { handleError } from "./utils/handleError.js";
 
 const getUsers = () => {
     try {
