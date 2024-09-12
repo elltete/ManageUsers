@@ -6,5 +6,5 @@ node_modules/
 .env.test
 
 # files
-/data/users.json
-/error/log.json
+data/
+error/
