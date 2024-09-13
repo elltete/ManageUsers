@@ -2,12 +2,11 @@ import { randomUUID } from "node:crypto";
 import { writeFileSync, readFileSync, existsSync } from "node:fs";
 
 const handleError = (error, path) => {
-    try{
         const existsFile = existsSync(path);
 
         if (!existsFile){
-            writeFileSync(path);
-            handleError(new Error("CREATING FILE", path));
+            writeFileSync(path, JSON.stringify([]));
+            handleError(new Error("CREATING FILE"), path);
         }
 
         const errorData = JSON.parse(readFileSync(path));
@@ -21,10 +20,6 @@ const handleError = (error, path) => {
         errorData.push(newError);
 
         writeFileSync(path, JSON.stringify(errorData));
-
-    } catch (error) {
-
-    }
 }
 
 export { handleError }
