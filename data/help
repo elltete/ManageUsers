@@ -1,0 +1,13 @@
+*************************
+How to use:
+node index.js help -> information about commands
+node index.js getAllDataUsers -> List all data users ** warning **
+node index.js getCompactDataUsers -> List compact data users
+node index.js getUsersbyId "id" -> List user by id
+node index.js getUsersbyEmail "email" -> List user by email
+node index.js addUser "firstName","lastName","email","password" -> add new user
+node index.js updateUser "id or email" "firstName" "lastName" "password" -> update user information (id and email do not change)
+node index.js changeLoggIn "id or email" -> change data LoggedIn
+node index.js login "email" "password" -> verify LogIn
+node index.js delete "id/email" -> delete user
+*************************
