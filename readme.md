@@ -65,3 +65,5 @@ isLoggedIn: boolean
     ○ El email debe ser único entre los usuarios.
     ○ La contraseña no debe guardarse en texto plano, debe estar hasheada.
 
+Ver de generar dos archivos
+El de Errores y el de Logueo

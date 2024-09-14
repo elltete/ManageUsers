@@ -8,38 +8,34 @@ const args = process.argv.splice(2);
 
 let input;
 
-if (args == ""){
-    input = "invalid";
-} else {
-    input = args[0].toLowerCase();
-}
+(args == "") ? input = "invalid" : input = args[0].toLowerCase();
 
 switch (input) {
-    case "getUsers":
+    case "getusers":
         console.log(getUsers());
     break;
-    case "getInfoUsers":
+    case "getinfousers":
         console.log(getInfoUsers());
     break;
-    case "getUsersbyId":
+    case "getusersbyid":
         console.log(getUsersbyId(args[1]));
     break;
-    case "getUsersbyEmail":
+    case "getusersbyemail":
         console.log(getUsersbyEmail(args[1]));
     break;
-    case "addUser":
+    case "adduser":
         console.log(addUser(args));
     break;
-    case "updateUser":
+    case "updateuser":
         console.log(updateUser(args));
     break;
-    case "changeStatusLoggIn":
+    case "changestatusioggin":
         console.log(changeStatusLoggIn());
     break;
-    case "logIn":
+    case "login":
         console.log(logIn(args));
     break;
-    case "deleteUser":
+    case "deleteuser":
         console.log(deleteUser(args[1]));
     break;
     case "help":

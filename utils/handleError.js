@@ -6,7 +6,7 @@ const handleError = (error, path) => {
 
         if (!existsFile){
             writeFileSync(path, JSON.stringify([]));
-            handleError(new Error("CREATING FILE"), path);
+            handleError(new Error("CREATING ERROR FILE"), path);
         }
 
         const errorData = JSON.parse(readFileSync(path));
