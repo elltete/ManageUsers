@@ -7,19 +7,19 @@ Modo de uso: node index.js help
 Muestra informacion de los comandos disponibles.
 
 - GET ALL DATA USERS
-Modo de uso: node index.js getAllDataUsers
+Modo de uso: node index.js getUsers
 Muestra toda la informacion de cada usuario en la basa de usuarios. Utilizarla con precaucion, ya que muestra la password hasheada
 
 - GET COMPACT DATA USERS
-Modo de uso: node index.js getCompactDataUsers
+Modo de uso: node index.js getInfoUsers
 Muestra informacion compacta de cada usuario en la basa de usuarios. 
 
 - GET USER BY ID
-Modo de uso: node index.js getUsersbyId "id"
+Modo de uso: node index.js getUsersById "id"
 Muestra informacion compacta del usuario segun el id informado.
 
 - GET USER BY EMAIL
-Modo de uso: node index.js getUsersbyId "email"
+Modo de uso: node index.js getUsersByEmail "email"
 Muestra informacion compacta del usuario segun el email informado.
 
 - ADDUSER
@@ -30,16 +30,16 @@ Da de alta un nuevo usuario en la base de usuarios, validando que el email sea u
 Modo de uso: node index.js updateUser "id or email" "firstName" "lastName" "email" "password"
 Modifica informacion del usuario indicado segun su id o email.
 
-- CHANGE LOGGIN
-Modo de uso: node index.js changeLoggIn "id or email"
+- CHANGE STATUS LOGGIN
+Modo de uso: node index.js changeStatusLoggIn "id or email"
 Modifica el estado de la propiedad logged del usuario indicado por su id o email.
 
 - LOGIN
 Modo de uso: node index.js login "email" "password"
-Verifica que el usuario y password ingresado sean correctos segun la informacion en la base de usuarios. Se responde que algunos de los datos ingresados son invalidos, o que el acceso fue concedido.
+Verifica que el usuario y password ingresado sean correctos segun la informacion en la base de usuarios. Se responde que algunos de los datos ingresados son invalidos, o que el acceso fue exitoso.
 
-- DELETE
-Modo de uso: node index.js delete "id or email"
+- DELETE USER
+Modo de uso: node index.js deleteUser "id or email"
 Elimina de la base el usuario indicado segun se indique el id o el email
 
 

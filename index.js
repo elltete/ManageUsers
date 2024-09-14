@@ -1,4 +1,4 @@
-import { getUsers, getUsersbyId, addUser, updateUser, deleteUser, help } from "./models.js";
+import { getUsers, getInfoUsers, getUsersbyId, getUsersbyEmail, addUser, updateUser, changeStatusLoggIn, logIn, deleteUser, help } from "./models.js";
 import 'dotenv/config';
 import { handleError } from "./utils/handleError.js";
 
@@ -9,7 +9,7 @@ const args = process.argv.splice(2);
 let input;
 
 if (args == ""){
-    input = 1;
+    input = "invalid";
 } else {
     input = args[0].toLowerCase();
 }
@@ -18,14 +18,26 @@ switch (input) {
     case "getUsers":
         console.log(getUsers());
     break;
+    case "getInfoUsers":
+        console.log(getInfoUsers());
+    break;
     case "getUsersbyId":
         console.log(getUsersbyId(args[1]));
+    break;
+    case "getUsersbyEmail":
+        console.log(getUsersbyEmail(args[1]));
     break;
     case "addUser":
         console.log(addUser(args));
     break;
     case "updateUser":
         console.log(updateUser(args));
+    break;
+    case "changeStatusLoggIn":
+        console.log(changeStatusLoggIn());
+    break;
+    case "logIn":
+        console.log(logIn(args));
     break;
     case "deleteUser":
         console.log(deleteUser(args[1]));
