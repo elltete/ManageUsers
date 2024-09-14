@@ -20,6 +20,10 @@ const getUsers = () => {
 
     const dataUsers = JSON.parse(readFileSync(DATA_USERS));
 
+    if (dataUsers.length == 0) {
+      throw new Error("DATA USER FILE IS EMPTY");
+    }
+
     return dataUsers;
 
   } catch (error) {
@@ -30,7 +34,27 @@ const getUsers = () => {
 
 const getInfoUsers = () => {
   try {
-  } catch (error) {}
+
+  const dataUsers = getUsers();
+
+  if(dataUsers.length == 0 | dataUsers === "DATA USER FILE IS EMPTY" | dataUsers === "CREATING DATA USERS FILE"){
+    throw new Error("DATA USER FILE IS EMPTY");
+  }
+
+  const dataInfoUser = dataUsers.map(function (user) {
+    return {
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName
+    }
+  });
+
+  return dataInfoUser;
+
+  } catch (error) {
+    handleError(error, LOG_FILE);
+    return error.message;
+  }
 };
 
 const getUsersbyId = (id) => {
