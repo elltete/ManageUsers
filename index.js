@@ -39,6 +39,6 @@ switch (input) {
         console.log(help());
     break;
     default:
-        handleError(new Error("INVALID ARGUMENTS"), LOG_FILE);
-        console.log("INVALID ARGUMENTS")
+        handleError(new Error("INVALID FUNTION, USE HELP FOR MORE INFORMATION"), LOG_FILE);
+        console.log("INVALID FUNTION, USE HELP FOR MORE INFORMATION")
 }
