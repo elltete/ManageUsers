@@ -14,13 +14,9 @@ Muestra toda la informacion de cada usuario en la basa de usuarios. Utilizarla c
 Modo de uso: node index.js getInfoUsers
 Muestra informacion compacta de cada usuario en la basa de usuarios. 
 
-- GET USER BY ID
-Modo de uso: node index.js getUsersById "id"
-Muestra informacion compacta del usuario segun el id informado.
-
-- GET USER BY EMAIL
-Modo de uso: node index.js getUsersByEmail "email"
-Muestra informacion compacta del usuario segun el email informado.
+- GET USER BY ID OR EMAIL
+Modo de uso: node index.js getUsersBy "id or email"
+Muestra informacion compacta del usuario segun el id o email informado.
 
 - ADDUSER
 Modo de uso: node index.js addUser "firstName" "lastName" "email" "password"

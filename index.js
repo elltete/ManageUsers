@@ -1,4 +1,4 @@
-import { getUsers, getInfoUsers, getUsersbyId, getUsersbyEmail, addUser, updateUser, changeStatusLoggIn, logIn, deleteUser, help } from "./models.js";
+import { getUsers, getInfoUsers, getUserBy, addUser, updateUser, changeStatusLoggIn, logIn, deleteUser, help } from "./models.js";
 import 'dotenv/config';
 import { handleError } from "./utils/handleError.js";
 
@@ -17,11 +17,8 @@ switch (input) {
     case "getinfousers":
         console.log(getInfoUsers());
     break;
-    case "getusersbyid":
-        console.log(getUsersbyId(args[1]));
-    break;
-    case "getusersbyemail":
-        console.log(getUsersbyEmail(args[1]));
+    case "getuserby":
+        console.log(getUserBy(args[1]));
     break;
     case "adduser":
         console.log(addUser(args));

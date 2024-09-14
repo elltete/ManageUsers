@@ -9,8 +9,6 @@ const DATA_HELP = process.env.DATA_HELP;
 
 const getUsers = () => {
   try {
-    //leer el archivo y mostrarlo
-
     const existsFile = existsSync(DATA_USERS);
 
     if (!existsFile) {
@@ -25,7 +23,6 @@ const getUsers = () => {
     }
 
     return dataUsers;
-
   } catch (error) {
     handleError(error, LOG_FILE);
     return error.message;
@@ -34,37 +31,68 @@ const getUsers = () => {
 
 const getInfoUsers = () => {
   try {
+    const dataUsers = getUsers();
 
-  const dataUsers = getUsers();
-
-  if(dataUsers.length == 0 | dataUsers === "DATA USER FILE IS EMPTY" | dataUsers === "CREATING DATA USERS FILE"){
-    throw new Error("DATA USER FILE IS EMPTY");
-  }
-
-  const dataInfoUser = dataUsers.map(function (user) {
-    return {
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName
+    if (
+      (dataUsers.length == 0) |
+      (dataUsers === "DATA USER FILE IS EMPTY") |
+      (dataUsers === "CREATING DATA USERS FILE")
+    ) {
+      throw new Error("DATA USER FILE IS EMPTY");
     }
-  });
 
-  return dataInfoUser;
+    const dataInfoUser = dataUsers.map(function (user) {
+      return {
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      };
+    });
 
+    return dataInfoUser;
   } catch (error) {
     handleError(error, LOG_FILE);
     return error.message;
   }
 };
 
-const getUsersbyId = (id) => {
+const getUserBy = (argv) => {
   try {
-  } catch (error) {}
-};
+    if (!argv) {
+      throw new Error("ID/EMAIL IS MISSING");
+    }
 
-const getUsersbyEmail = (email) => {
-  try {
-  } catch (error) {}
+    const dataUsers = getUsers();
+
+    if (
+      (dataUsers.length == 0) |
+      (dataUsers === "DATA USER FILE IS EMPTY") |
+      (dataUsers === "CREATING DATA USERS FILE")
+    ) {
+      throw new Error("DATA USER FILE IS EMPTY");
+    }
+
+    const foundUser = dataUsers.find(
+      (user) =>
+        (user.id === argv) | (user.email.toLowerCase() === argv.toLowerCase())
+    );
+
+    if (!foundUser) {
+      throw new Error("USER NOT FOUND IN DATA USERS");
+    }
+
+    const dataInfoUserShow = {
+      email: foundUser.email,
+      firstName: foundUser.firstName,
+      lastName: foundUser.lastName,
+      isLoggedIn: foundUser.isLoggedIn
+    };
+
+    return dataInfoUserShow;
+  } catch (error) {
+    handleError(error, LOG_FILE);
+    return error.message;
+  }
 };
 
 const addUser = (userData) => {
@@ -95,15 +123,14 @@ const deleteUser = (id) => {
 const help = () => {
   try {
     const exist = existsSync(DATA_HELP);
-    
+
     if (!exist) {
       throw new Error("HELP FILE NOT EXIST");
     }
 
     const dataHelp = readFileSync(DATA_HELP, "utf-8");
 
-    return (dataHelp);
-
+    return dataHelp;
   } catch (error) {
     handleError(error, LOG_FILE);
     return error.message;
@@ -113,8 +140,7 @@ const help = () => {
 export {
   getUsers,
   getInfoUsers,
-  getUsersbyId,
-  getUsersbyEmail,
+  getUserBy,
   addUser,
   updateUser,
   changeStatusLoggIn,
