@@ -26,8 +26,8 @@ switch (input) {
     case "updateuser":
         console.log(updateUser(args));
     break;
-    case "changestatusioggin":
-        console.log(changeStatusLoggIn());
+    case "changestatusloggin":
+        console.log(changeStatusLoggIn(args[1]));
     break;
     case "login":
         console.log(logIn(args));

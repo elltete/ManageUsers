@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, read, readFileSync, writeFileSync } from "node:fs";
 import { randomUUID, createHash } from "node:crypto";
 import "dotenv/config";
 import { handleError } from "./utils/handleError.js";
@@ -74,7 +74,7 @@ const getUserBy = (argv) => {
 
     const foundUser = dataUsers.find(
       (user) =>
-        (user.id === argv) || (user.email.toLowerCase() === argv.toLowerCase())
+        user.id === argv || user.email.toLowerCase() === argv.toLowerCase()
     );
 
     if (!foundUser) {
@@ -105,9 +105,49 @@ const updateUser = (userData) => {
   } catch (error) {}
 };
 
-const changeStatusLoggIn = () => {
+const changeStatusLoggIn = (email) => {
   try {
-  } catch (error) {}
+    if(!email){
+      throw new Error("EMAIL IS MISSING")
+    }
+
+    //unificar funciones
+
+    const dataUsers = getUsers();
+
+    if (
+      (dataUsers.length == 0) |
+      (dataUsers === "DATA USER FILE IS EMPTY") |
+      (dataUsers === "CREATING DATA USERS FILE")
+    ) {
+      throw new Error("DATA USER FILE IS EMPTY");
+    }
+
+    const foundUser = dataUsers.find(
+      (user) =>
+        user.id === email || user.email.toLowerCase() === email.toLowerCase()
+    );
+
+    if (!foundUser) {
+      throw new Error("USER NOT FOUND IN DATA USERS");
+    }
+
+    if (foundUser.isLoggedIn){
+      foundUser.isLoggedIn = false;
+    } else {
+      foundUser.isLoggedIn = true;
+    }
+
+    writeFileSync(DATA_USERS, JSON.stringify(dataUsers));
+
+    handleError(new Error("STATUS LOGGIN CHANGED"), LOG_FILE);
+
+    return "STATUS LOGGIN CHANGED"
+
+  } catch (error) {
+    handleError(error, LOG_FILE);
+    return error.message;
+  }
 };
 
 const logIn = (userData) => {
@@ -133,7 +173,7 @@ const deleteUser = (argv) => {
 
     const foundUser = dataUsers.find(
       (user) =>
-        (user.id === argv) || (user.email.toLowerCase() === argv.toLowerCase())
+        user.id === argv || user.email.toLowerCase() === argv.toLowerCase()
     );
 
     if (!foundUser) {
@@ -141,7 +181,7 @@ const deleteUser = (argv) => {
     }
 
     const newDataUsers = dataUsers.filter(
-      (user) => (user.email.toLowerCase() !== argv.toLowerCase())
+      (user) => user.email.toLowerCase() !== argv.toLowerCase()
     );
 
     writeFileSync(DATA_USERS, JSON.stringify(newDataUsers));

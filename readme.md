@@ -27,8 +27,8 @@ Modo de uso: node index.js updateUser "id or email" "firstName" "lastName" "emai
 Modifica informacion del usuario indicado segun su id o email.
 
 - CHANGE STATUS LOGGIN
-Modo de uso: node index.js changeStatusLoggIn "id or email"
-Modifica el estado de la propiedad logged del usuario indicado por su id o email.
+Modo de uso: node index.js changeStatusLoggIn "email"
+Modifica el estado de la propiedad logged del usuario indicado por su email.
 
 - LOGIN
 Modo de uso: node index.js login "email" "password"
@@ -63,3 +63,5 @@ isLoggedIn: boolean
 
 Ver de generar dos archivos
 El de Errores y el de Logueo
+
+    //unificar funciones
