@@ -345,13 +345,19 @@ const logIn = (userData) => {
       );
     }
 
-    foundUser.password = password;
+    let messageError;
 
-    writeFileSync(DATA_USERS, JSON.stringify(dataUsers));
+    if (foundUser.password === password) {
+      //validar encriptacion
+      messageError = "LOGIN SUCCESSFULLY";
+      handleError(new Error(messageError), LOG_FILE);
+    } else {
+      messageError = "PASSWORD INCORRECT";
+      handleError(new Error(messageError), LOG_FILE);
+    }
 
-    handleError(new Error("PASSWORD CHANGE SUCCESSFULLY"), LOG_FILE);
-
-    return error.message; //"PASSWORD CHANGE SUCCESSFULLY"
+    return messageError;
+    
   } catch (error) {
     handleError(error, LOG_FILE);
     return error.message;
