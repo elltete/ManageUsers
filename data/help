@@ -6,6 +6,7 @@ node index.js getInfoUsers -> List compact data users
 node index.js getUsersBy "id or email" -> List user by id or email
 node index.js addUser "firstName" "lastName" "email" "password" -> add new user
 node index.js updateUser "id or email" "firstName" "lastName" "email" "password" -> update user information (id does not change)
+node index.js changePassword "email" "currentPassword" "newPassword" -> change user password
 node index.js changeStatusLoggIn "email" -> change status data LoggedIn
 node index.js login "email" "password" -> verify LogIn
 node index.js deleteUser "id or email" -> delete user

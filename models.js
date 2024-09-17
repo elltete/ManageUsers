@@ -6,6 +6,7 @@ import {
   createNewUserObject,
   createUpdateUserObject,
 } from "./utils/createObjectUser.js";
+import { error } from "node:console";
 
 const DATA_USERS = process.env.DATA_USERS;
 const LOG_FILE = process.env.LOG_FILE;
@@ -127,7 +128,7 @@ const addUser = (userData) => {
     );
 
     if (foundUser) {
-      throw new Error("USER FOUND IN DATA USERS, ADD REQUEST HAS FAILED");
+      throw new Error("EMAIL USER HAS FOUND IN DATA USERS, ADD REQUEST HAS FAILED");
     }
 
     newUser = {
@@ -147,9 +148,8 @@ const addUser = (userData) => {
       id: newUser.id,
       firstName: newUser.firstName,
       lastName: newUser.lastName,
-      email: newUser.email
+      email: newUser.email,
     };
-
   } catch (error) {
     handleError(error, LOG_FILE);
     return error.message;
@@ -159,7 +159,6 @@ const addUser = (userData) => {
 const updateUser = (userData) => {
   try {
     if (userData.length != 6) {
-      //verificar, ya que recivbe un Object
       throw new Error("INVALID ARGUMENTS, USE HELP FOR MORE INFORMATION");
     }
 
@@ -182,7 +181,9 @@ const updateUser = (userData) => {
     }
 
     const foundUser = dataUsers.find(
-      (user) => user.id.toLowerCase() === dataUserFind.toLowerCase() || user.email.toLowerCase() === dataUserFind.toLowerCase()
+      (user) =>
+        user.id.toLowerCase() === dataUserFind.toLowerCase() ||
+        user.email.toLowerCase() === dataUserFind.toLowerCase()
     );
 
     if (!foundUser) {
@@ -190,6 +191,16 @@ const updateUser = (userData) => {
         "USER NOT FOUND IN DATA USERS, MODIFY REQUEST HAS FAILED"
       );
     }
+
+    // En caso que se quiera modificar el email, se verifica que no exista antes, ya que debe ser unico en el sistema
+
+    // FALTA VALIDAR
+
+
+    if(dataUsers.map((user) => user.email.toLowerCase() === email.toLowerCase()).length > 0){
+
+    }
+
 
     foundUser.firstName = firstName;
     foundUser.lastName = lastName;
@@ -202,9 +213,8 @@ const updateUser = (userData) => {
       id: foundUser.id,
       firstName: foundUser.firstName,
       lastName: foundUser.lastName,
-      email: foundUser.email
+      email: foundUser.email,
     };
-
   } catch (error) {
     handleError(error, LOG_FILE);
     return error.message;
@@ -255,14 +265,93 @@ const changeStatusLoggIn = (email) => {
   }
 };
 
+//VALIDAR
+const changePassword = (userData) => {
+  try {
+    if (userData.length != 4) {
+      throw new Error("INVALID ARGUMENTS, USE HELP FOR MORE INFORMATION");
+    }
+
+    const email = userData[1];
+    const currentPassword = userData[2];
+    const newPassword = userData[3];
+
+    const dataUsers = getUsers();
+
+    if (
+      (dataUsers.length == 0) |
+      (dataUsers === "DATA USER FILE IS EMPTY") |
+      (dataUsers === "CREATING DATA USERS FILE")
+    ) {
+      throw new Error("DATA USER FILE IS EMPTY");
+    }
+
+    const foundUser = dataUsers.find(
+      (user) => user.email.toLowerCase() === email.toLowerCase()
+    );
+
+    if (!foundUser) {
+      throw new Error(
+        "USER NOT FOUND IN DATA USERS, CHANGE REQUEST HAS FAILED"
+      );
+    }
+    let messageError;
+
+    if (foundUser.password === currentPassword) {
+      //validar encriptacion
+      foundUser.password = newPassword;
+      writeFileSync(DATA_USERS, JSON.stringify(dataUsers));
+      messageError = "PASSWORD CHANGE SUCCESSFULLY";
+      handleError(new Error(messageError), LOG_FILE);
+
+    } else {
+      messageError = "PASSWORD INCORRECT";
+      handleError(new Error(messageError), LOG_FILE);
+    }
+
+    return messageError;
+  } catch (error) {
+    handleError(error, LOG_FILE);
+    return error.message;
+  }
+};
+
 const logIn = (userData) => {
   try {
     if (userData.length != 3) {
       throw new Error("INVALID ARGUMENTS, USE HELP FOR MORE INFORMATION");
     }
 
-    const email = userdata[1];
+    const email = userData[1];
     const password = userData[2];
+
+    const dataUsers = getUsers();
+
+    if (
+      (dataUsers.length == 0) |
+      (dataUsers === "DATA USER FILE IS EMPTY") |
+      (dataUsers === "CREATING DATA USERS FILE")
+    ) {
+      throw new Error("DATA USER FILE IS EMPTY");
+    }
+
+    const foundUser = dataUsers.find(
+      (user) => user.email.toLowerCase() === email.toLowerCase()
+    );
+
+    if (!foundUser) {
+      throw new Error(
+        "USER NOT FOUND IN DATA USERS, CHANGE REQUEST HAS FAILED"
+      );
+    }
+
+    foundUser.password = password;
+
+    writeFileSync(DATA_USERS, JSON.stringify(dataUsers));
+
+    handleError(new Error("PASSWORD CHANGE SUCCESSFULLY"), LOG_FILE);
+
+    return error.message; //"PASSWORD CHANGE SUCCESSFULLY"
   } catch (error) {
     handleError(error, LOG_FILE);
     return error.message;
@@ -330,6 +419,7 @@ export {
   getUserBy,
   addUser,
   updateUser,
+  changePassword,
   changeStatusLoggIn,
   logIn,
   deleteUser,
