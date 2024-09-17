@@ -14,10 +14,10 @@ const createNewUserObject = (args) => {
 
 const createUpdateUserObject = (args) => {
     return{
-        firstName: args[1],
-        lastName: args[2],
-        email: args[3],
-        password: args[4]
+        firstName: args[2],
+        lastName: args[3],
+        email: args[4],
+        password: args[5]
     }
 }
 

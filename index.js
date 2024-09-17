@@ -1,7 +1,6 @@
 import { getUsers, getInfoUsers, getUserBy, addUser, updateUser, changeStatusLoggIn, logIn, deleteUser, help } from "./models.js";
 import 'dotenv/config';
 import { handleError } from "./utils/handleError.js";
-import { createNewUserObject, createUpdateUserObject } from "./utils/createObjectUser.js"
 
 const LOG_FILE = process.env.LOG_FILE;
 
@@ -25,7 +24,7 @@ switch (input) {
         console.log(addUser(args));
     break;
     case "updateuser":
-        console.log(updateUser(args[1],createUpdateUserObject(args)));
+        console.log(updateUser(args));
     break;
     case "changestatusloggin":
         console.log(changeStatusLoggIn(args[1]));

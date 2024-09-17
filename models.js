@@ -2,7 +2,10 @@ import { existsSync, read, readFileSync, writeFileSync } from "node:fs";
 import { randomUUID, createHash } from "node:crypto";
 import "dotenv/config";
 import { handleError } from "./utils/handleError.js";
-import { createNewUserObject, createUpdateUserObject } from "./utils/createObjectUser.js"
+import {
+  createNewUserObject,
+  createUpdateUserObject,
+} from "./utils/createObjectUser.js";
 
 const DATA_USERS = process.env.DATA_USERS;
 const LOG_FILE = process.env.LOG_FILE;
@@ -98,13 +101,16 @@ const getUserBy = (argv) => {
 
 const addUser = (userData) => {
   try {
-    if (userData.length != 5){ //verificar, ya que recivbe un Object
+    if (userData.length != 5) {
+      //verificar, ya que recivbe un Object
       throw new Error("INVALID ARGUMENTS, USE HELP FOR MORE INFORMATION");
     }
 
     let newUser = createNewUserObject(userData);
 
-    const {firstName, lastName, email, password, isLoggedIn} = newUser; //destructuring
+    const { firstName, lastName, email, password, isLoggedIn } = newUser; //destructuring
+
+    // VALIDAR el emial sea formato correcto
 
     const dataUsers = getUsers();
 
@@ -129,15 +135,20 @@ const addUser = (userData) => {
       firstName,
       lastName,
       email,
-      password, ////// ENCRIPTAR
-      isLoggedIn
-    }
+      password, ////// FALTA ENCRIPTAR
+      isLoggedIn,
+    };
 
     dataUsers.push(newUser);
 
     writeFileSync(DATA_USERS, JSON.stringify(dataUsers));
 
-    return newUser;
+    return {
+      id: newUser.id,
+      firstName: newUser.firstName,
+      lastName: newUser.lastName,
+      email: newUser.email
+    };
 
   } catch (error) {
     handleError(error, LOG_FILE);
@@ -145,8 +156,55 @@ const addUser = (userData) => {
   }
 };
 
-const updateUser = (id, objectUserData) => {
+const updateUser = (userData) => {
   try {
+    if (userData.length != 6) {
+      //verificar, ya que recivbe un Object
+      throw new Error("INVALID ARGUMENTS, USE HELP FOR MORE INFORMATION");
+    }
+
+    let modifyUser = createUpdateUserObject(userData);
+
+    const dataUserFind = userData[1];
+
+    const { firstName, lastName, email, password } = modifyUser; //destructuring
+
+    // VALIDAR el email sea formato correcto
+
+    const dataUsers = getUsers();
+
+    if (
+      (dataUsers.length == 0) |
+      (dataUsers === "DATA USER FILE IS EMPTY") |
+      (dataUsers === "CREATING DATA USERS FILE")
+    ) {
+      throw new Error("DATA USER FILE IS EMPTY");
+    }
+
+    const foundUser = dataUsers.find(
+      (user) => user.id.toLowerCase() === dataUserFind.toLowerCase() || user.email.toLowerCase() === dataUserFind.toLowerCase()
+    );
+
+    if (!foundUser) {
+      throw new Error(
+        "USER NOT FOUND IN DATA USERS, MODIFY REQUEST HAS FAILED"
+      );
+    }
+
+    foundUser.firstName = firstName;
+    foundUser.lastName = lastName;
+    foundUser.email = email;
+    foundUser.password = password;
+
+    writeFileSync(DATA_USERS, JSON.stringify(dataUsers));
+
+    return {
+      id: foundUser.id,
+      firstName: foundUser.firstName,
+      lastName: foundUser.lastName,
+      email: foundUser.email
+    };
+
   } catch (error) {
     handleError(error, LOG_FILE);
     return error.message;
@@ -155,8 +213,8 @@ const updateUser = (id, objectUserData) => {
 
 const changeStatusLoggIn = (email) => {
   try {
-    if(!email){
-      throw new Error("EMAIL IS MISSING")
+    if (!email) {
+      throw new Error("EMAIL IS MISSING");
     }
 
     //unificar funciones
@@ -180,7 +238,7 @@ const changeStatusLoggIn = (email) => {
       throw new Error("USER NOT FOUND IN DATA USERS");
     }
 
-    if (foundUser.isLoggedIn){
+    if (foundUser.isLoggedIn) {
       foundUser.isLoggedIn = false;
     } else {
       foundUser.isLoggedIn = true;
@@ -190,8 +248,7 @@ const changeStatusLoggIn = (email) => {
 
     handleError(new Error("STATUS LOGGIN CHANGED"), LOG_FILE);
 
-    return "STATUS LOGGIN CHANGED"
-
+    return "STATUS LOGGIN CHANGED";
   } catch (error) {
     handleError(error, LOG_FILE);
     return error.message;
@@ -200,17 +257,16 @@ const changeStatusLoggIn = (email) => {
 
 const logIn = (userData) => {
   try {
-    if (userData.length != 3){
+    if (userData.length != 3) {
       throw new Error("INVALID ARGUMENTS, USE HELP FOR MORE INFORMATION");
     }
 
     const email = userdata[1];
     const password = userData[2];
-
-
-  } catch (error) {    
+  } catch (error) {
     handleError(error, LOG_FILE);
-    return error.message;}
+    return error.message;
+  }
 };
 
 const deleteUser = (argv) => {
