@@ -24,7 +24,7 @@ Da de alta un nuevo usuario en la base de usuarios, validando que el email sea u
 
 - UPDATEUSER
 Modo de uso: node index.js updateUser "id or email" "firstName" "lastName" "email" "password"
-Modifica informacion del usuario indicado segun su id o email.
+Modifica informacion del usuario indicado segun su id o email. El Id no se puede modificar.
 
 - CHANGE STATUS LOGGIN
 Modo de uso: node index.js changeStatusLoggIn "email"

@@ -1,12 +1,24 @@
-// obtener los args desde index
-
-// desarrollar las funciones
 
 // control de errores
 
 
-const createUserObject = () => {}
+const createNewUserObject = (args) => {
+    return{
+        firstName: args[1],
+        lastName: args[2],
+        email: args[3],
+        password: args[4],
+        isLoggedIn: false
+    }
+}
 
-const createUpdateUserObject = () => {}
+const createUpdateUserObject = (args) => {
+    return{
+        firstName: args[1],
+        lastName: args[2],
+        email: args[3],
+        password: args[4]
+    }
+}
 
-export { createUserObject, createUpdateUserObject }
+export { createNewUserObject, createUpdateUserObject }
