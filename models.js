@@ -295,9 +295,7 @@ const logIn = (userData) => {
     const { email, password } = createLoginUserObject(userData); //destructuring
 
     if (!validateEmail(email)) {
-      throw new Error(
-        "EMAIL FORMAT INVALID, LOGIN REQUEST HAS FAILED"
-      );
+      throw new Error("EMAIL FORMAT INVALID, LOGIN REQUEST HAS FAILED");
     }
 
     const dataUsers = getUsers();
@@ -314,8 +312,9 @@ const logIn = (userData) => {
       throw new Error("PASSWORD INCORRECT, LOGIN REQUEST HAS FAILED");
     }
 
-    (foundUser.isLoggedIn = true),
-      writeFileSync(DATA_USERS, JSON.stringify(dataUsers));
+    foundUser.lastName = true;
+
+    writeFileSync(DATA_USERS, JSON.stringify(dataUsers));
 
     handleError(new Error("LOGIN SUCCESS"), LOG_FILE);
 
