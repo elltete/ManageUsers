@@ -1,12 +1,16 @@
-import { existsSync, read, readFileSync, writeFileSync } from "node:fs";
-import { randomUUID, createHash } from "node:crypto";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { randomUUID } from "node:crypto";
 import "dotenv/config";
 import { handleError } from "./utils/handleError.js";
 import {
   createNewUserObject,
   createUpdateUserObject,
+  validateEmail,
+  hashPassword,
+  compareHashPassword,
+  createChangePasswordUserObject,
+  createLoginUserObject,
 } from "./utils/createObjectUser.js";
-import { error } from "node:console";
 
 const DATA_USERS = process.env.DATA_USERS;
 const LOG_FILE = process.env.LOG_FILE;
@@ -18,13 +22,13 @@ const getUsers = () => {
 
     if (!existsFile) {
       writeFileSync(DATA_USERS, JSON.stringify([]));
-      throw new Error("CREATING DATA USERS FILE");
+      throw new Error("USERS FILE DOESN'T EXIST - CREATING USERS FILE");
     }
 
     const dataUsers = JSON.parse(readFileSync(DATA_USERS));
 
     if (dataUsers.length == 0) {
-      throw new Error("DATA USER FILE IS EMPTY");
+      throw new Error("USER FILE IS EMPTY");
     }
 
     return dataUsers;
@@ -38,12 +42,8 @@ const getInfoUsers = () => {
   try {
     const dataUsers = getUsers();
 
-    if (
-      (dataUsers.length == 0) |
-      (dataUsers === "DATA USER FILE IS EMPTY") |
-      (dataUsers === "CREATING DATA USERS FILE")
-    ) {
-      throw new Error("DATA USER FILE IS EMPTY");
+    if (typeof dataUsers === "string") {
+      throw new Error("GET-INFO-USERS REQUEST HAS FAILED");
     }
 
     const dataInfoUser = dataUsers.map(function (user) {
@@ -51,6 +51,7 @@ const getInfoUsers = () => {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
+        isLoggesIn: user.isLoggedIn,
       };
     });
 
@@ -69,12 +70,8 @@ const getUserBy = (argv) => {
 
     const dataUsers = getUsers();
 
-    if (
-      (dataUsers.length == 0) |
-      (dataUsers === "DATA USER FILE IS EMPTY") |
-      (dataUsers === "CREATING DATA USERS FILE")
-    ) {
-      throw new Error("DATA USER FILE IS EMPTY");
+    if (typeof dataUsers === "string") {
+      throw new Error("GET-USER-BY REQUEST HAS FAILED");
     }
 
     const foundUser = dataUsers.find(
@@ -103,7 +100,6 @@ const getUserBy = (argv) => {
 const addUser = (userData) => {
   try {
     if (userData.length != 5) {
-      //verificar, ya que recivbe un Object
       throw new Error("INVALID ARGUMENTS, USE HELP FOR MORE INFORMATION");
     }
 
@@ -111,16 +107,14 @@ const addUser = (userData) => {
 
     const { firstName, lastName, email, password, isLoggedIn } = newUser; //destructuring
 
-    // VALIDAR el emial sea formato correcto
+    if (!validateEmail(email)) {
+      throw new Error("EMAIL FORMAT INVALID, ADD-USER REQUEST HAS FAILED");
+    }
 
     const dataUsers = getUsers();
 
-    if (
-      (dataUsers.length == 0) |
-      (dataUsers === "DATA USER FILE IS EMPTY") |
-      (dataUsers === "CREATING DATA USERS FILE")
-    ) {
-      throw new Error("DATA USER FILE IS EMPTY");
+    if (typeof dataUsers === "string") {
+      throw new Error("ADD-USER REQUEST HAS FAILED");
     }
 
     const foundUser = dataUsers.find(
@@ -128,7 +122,9 @@ const addUser = (userData) => {
     );
 
     if (foundUser) {
-      throw new Error("EMAIL USER HAS FOUND IN DATA USERS, ADD REQUEST HAS FAILED");
+      throw new Error(
+        "EMAIL USER HAS FOUND IN DATA USERS, ADD-USER REQUEST HAS FAILED"
+      );
     }
 
     newUser = {
@@ -136,7 +132,7 @@ const addUser = (userData) => {
       firstName,
       lastName,
       email,
-      password, ////// FALTA ENCRIPTAR
+      password: hashPassword(password),
       isLoggedIn,
     };
 
@@ -162,52 +158,55 @@ const updateUser = (userData) => {
       throw new Error("INVALID ARGUMENTS, USE HELP FOR MORE INFORMATION");
     }
 
-    let modifyUser = createUpdateUserObject(userData);
-
     const dataUserFind = userData[1];
 
-    const { firstName, lastName, email, password } = modifyUser; //destructuring
+    const { firstName, lastName, email, password } =
+      createUpdateUserObject(userData); //destructuring
 
-    // VALIDAR el email sea formato correcto
+    if (!validateEmail(email)) {
+      throw new Error("EMAIL FORMAT INVALID, UPDATE-USER REQUEST HAS FAILED");
+    }
 
     const dataUsers = getUsers();
 
-    if (
-      (dataUsers.length == 0) |
-      (dataUsers === "DATA USER FILE IS EMPTY") |
-      (dataUsers === "CREATING DATA USERS FILE")
-    ) {
-      throw new Error("DATA USER FILE IS EMPTY");
+    if (typeof dataUsers === "string") {
+      throw new Error("UPDATE-USER REQUEST HAS FAILED");
     }
 
     const foundUser = dataUsers.find(
-      (user) =>
-        user.id.toLowerCase() === dataUserFind.toLowerCase() ||
-        user.email.toLowerCase() === dataUserFind.toLowerCase()
+      (user) => user.id.toLowerCase() === dataUserFind.toLowerCase()
     );
 
     if (!foundUser) {
       throw new Error(
-        "USER NOT FOUND IN DATA USERS, MODIFY REQUEST HAS FAILED"
+        "USER NOT FOUND IN DATA USERS, UPDATE-USER REQUEST HAS FAILED"
       );
     }
 
     // En caso que se quiera modificar el email, se verifica que no exista antes, ya que debe ser unico en el sistema
+    const foundEmail = dataUsers.find(
+      (user) => user.email.toLowerCase() === email.toLowerCase()
+    );
 
-    // FALTA VALIDAR
+    if (
+      !foundEmail ||
+      foundEmail.email.toLowerCase() === foundUser.email.toLowerCase()
+    ) {
+      foundUser.firstName = firstName;
+      foundUser.lastName = lastName;
+      foundUser.email = email;
+      if (!compareHashPassword(password, foundUser.password)) {
+        foundUser.password = hashPassword(password);
+      }
 
+      writeFileSync(DATA_USERS, JSON.stringify(dataUsers));
 
-    if(dataUsers.map((user) => user.email.toLowerCase() === email.toLowerCase()).length > 0){
-
+      handleError(new Error("USER UPDATED"), LOG_FILE);
+    } else {
+      throw new Error(
+        "EMAIL USER MUST BE UNIQUE IN DATA USERS, UPDATE-USER REQUEST HAS FAILED"
+      );
     }
-
-
-    foundUser.firstName = firstName;
-    foundUser.lastName = lastName;
-    foundUser.email = email;
-    foundUser.password = password;
-
-    writeFileSync(DATA_USERS, JSON.stringify(dataUsers));
 
     return {
       id: foundUser.id,
@@ -227,16 +226,10 @@ const changeStatusLoggIn = (email) => {
       throw new Error("EMAIL IS MISSING");
     }
 
-    //unificar funciones
-
     const dataUsers = getUsers();
 
-    if (
-      (dataUsers.length == 0) |
-      (dataUsers === "DATA USER FILE IS EMPTY") |
-      (dataUsers === "CREATING DATA USERS FILE")
-    ) {
-      throw new Error("DATA USER FILE IS EMPTY");
+    if (typeof dataUsers === "string") {
+      throw new Error("CHANGE-STATUS-LOGGIN REQUEST HAS FAILED");
     }
 
     const foundUser = dataUsers.find(
@@ -265,25 +258,19 @@ const changeStatusLoggIn = (email) => {
   }
 };
 
-//VALIDAR
 const changePassword = (userData) => {
   try {
     if (userData.length != 4) {
       throw new Error("INVALID ARGUMENTS, USE HELP FOR MORE INFORMATION");
     }
 
-    const email = userData[1];
-    const currentPassword = userData[2];
-    const newPassword = userData[3];
+    const { email, currentPassword, newPassword } =
+      createChangePasswordUserObject(userData); //destructuring
 
     const dataUsers = getUsers();
 
-    if (
-      (dataUsers.length == 0) |
-      (dataUsers === "DATA USER FILE IS EMPTY") |
-      (dataUsers === "CREATING DATA USERS FILE")
-    ) {
-      throw new Error("DATA USER FILE IS EMPTY");
+    if (typeof dataUsers === "string") {
+      throw new Error("CHANGE-PASSWORD REQUEST HAS FAILED");
     }
 
     const foundUser = dataUsers.find(
@@ -292,24 +279,21 @@ const changePassword = (userData) => {
 
     if (!foundUser) {
       throw new Error(
-        "USER NOT FOUND IN DATA USERS, CHANGE REQUEST HAS FAILED"
+        "USER NOT FOUND IN DATA USERS, CHANGE-PASWWORD REQUEST HAS FAILED"
       );
     }
-    let messageError;
 
-    if (foundUser.password === currentPassword) {
-      //validar encriptacion
-      foundUser.password = newPassword;
-      writeFileSync(DATA_USERS, JSON.stringify(dataUsers));
-      messageError = "PASSWORD CHANGE SUCCESSFULLY";
-      handleError(new Error(messageError), LOG_FILE);
-
-    } else {
-      messageError = "PASSWORD INCORRECT";
-      handleError(new Error(messageError), LOG_FILE);
+    if (!compareHashPassword(currentPassword, foundUser.password)) {
+      throw new Error("PASSWORD INCORRECT, CHANGE-PASSWORD REQUEST HAS FAILED");
     }
 
-    return messageError;
+    foundUser.password = hashPassword(newPassword);
+
+    writeFileSync(DATA_USERS, JSON.stringify(dataUsers));
+
+    handleError(new Error("PASSWORD CHANGE SUCCESSFULLY"), LOG_FILE);
+
+    return "PASSWORD CHANGE SUCCESSFULLY";
   } catch (error) {
     handleError(error, LOG_FILE);
     return error.message;
@@ -322,17 +306,12 @@ const logIn = (userData) => {
       throw new Error("INVALID ARGUMENTS, USE HELP FOR MORE INFORMATION");
     }
 
-    const email = userData[1];
-    const password = userData[2];
+    const { email, password } = createLoginUserObject(userData); //destructuring
 
     const dataUsers = getUsers();
 
-    if (
-      (dataUsers.length == 0) |
-      (dataUsers === "DATA USER FILE IS EMPTY") |
-      (dataUsers === "CREATING DATA USERS FILE")
-    ) {
-      throw new Error("DATA USER FILE IS EMPTY");
+    if (typeof dataUsers === "string") {
+      throw new Error("LOGIN REQUEST HAS FAILED");
     }
 
     const foundUser = dataUsers.find(
@@ -340,24 +319,19 @@ const logIn = (userData) => {
     );
 
     if (!foundUser) {
-      throw new Error(
-        "USER NOT FOUND IN DATA USERS, CHANGE REQUEST HAS FAILED"
-      );
+      throw new Error("USER NOT FOUND IN DATA USERS, LOGIN REQUEST HAS FAILED");
     }
 
-    let messageError;
-
-    if (foundUser.password === password) {
-      //validar encriptacion
-      messageError = "LOGIN SUCCESSFULLY";
-      handleError(new Error(messageError), LOG_FILE);
-    } else {
-      messageError = "PASSWORD INCORRECT";
-      handleError(new Error(messageError), LOG_FILE);
+    if (!compareHashPassword(password, foundUser.password)) {
+      throw new Error("PASSWORD INCORRECT, LOGIN REQUEST HAS FAILED");
     }
 
-    return messageError;
-    
+    (foundUser.isLoggedIn = true),
+      writeFileSync(DATA_USERS, JSON.stringify(dataUsers));
+
+    handleError(new Error("LOGIN SUCCESS"), LOG_FILE);
+
+    return "LOGIN SUCCESS";
   } catch (error) {
     handleError(error, LOG_FILE);
     return error.message;
@@ -372,12 +346,8 @@ const deleteUser = (argv) => {
 
     const dataUsers = getUsers();
 
-    if (
-      (dataUsers.length == 0) |
-      (dataUsers === "DATA USER FILE IS EMPTY") |
-      (dataUsers === "CREATING DATA USERS FILE")
-    ) {
-      throw new Error("DATA USER FILE IS EMPTY");
+    if (typeof dataUsers === "string") {
+      throw new Error("DELETE-USER REQUEST HAS FAILED");
     }
 
     const foundUser = dataUsers.find(
@@ -390,12 +360,13 @@ const deleteUser = (argv) => {
     }
 
     const newDataUsers = dataUsers.filter(
-      (user) => user.email.toLowerCase() !== argv.toLowerCase()
+      (user) =>
+        user.email.toLowerCase() !== argv.toLowerCase() && user.id !== argv
     );
 
     writeFileSync(DATA_USERS, JSON.stringify(newDataUsers));
 
-    return newDataUsers;
+    return foundUser;
   } catch (error) {
     handleError(error, LOG_FILE);
     return error.message;
