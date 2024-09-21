@@ -13,53 +13,45 @@ import {
 } from "./utils/createObjectUser.js";
 
 const DATA_USERS = process.env.DATA_USERS;
+const ERROR_FILE = process.env.ERROR_FILE;
 const LOG_FILE = process.env.LOG_FILE;
 const DATA_HELP = process.env.DATA_HELP;
 
 const getUsers = () => {
-  try {
-    const existsFile = existsSync(DATA_USERS);
+  const existsFile = existsSync(DATA_USERS);
 
-    if (!existsFile) {
-      writeFileSync(DATA_USERS, JSON.stringify([]));
-      throw new Error("USERS FILE DOESN'T EXIST - CREATING USERS FILE");
-    }
-
-    const dataUsers = JSON.parse(readFileSync(DATA_USERS));
-
-    if (dataUsers.length == 0) {
-      throw new Error("USER FILE IS EMPTY");
-    }
-
-    return dataUsers;
-  } catch (error) {
-    handleError(error, LOG_FILE);
-    return error.message;
+  if (!existsFile) {
+    writeFileSync(DATA_USERS, JSON.stringify([]));
+    handleError(
+      new Error("USERS FILE DOESN'T EXIST - CREATING USERS FILE"),
+      ERROR_FILE
+    );
+    console.log("USERS FILE DOESN'T EXIST - CREATING USERS FILE");
   }
+
+  const dataUsers = JSON.parse(readFileSync(DATA_USERS));
+
+  if (dataUsers.length == 0) {
+    handleError(new Error("DATA USER FILE IS EMPTY"), ERROR_FILE);
+    console.log("DATA USER FILE IS EMPTY");
+  }
+
+  return dataUsers;
 };
 
 const getInfoUsers = () => {
-  try {
-    const dataUsers = getUsers();
+  const dataUsers = getUsers();
 
-    if (typeof dataUsers === "string") {
-      throw new Error("GET-INFO-USERS REQUEST HAS FAILED");
-    }
+  const dataInfoUser = dataUsers.map(function (user) {
+    return {
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      isLoggesIn: user.isLoggedIn,
+    };
+  });
 
-    const dataInfoUser = dataUsers.map(function (user) {
-      return {
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        isLoggesIn: user.isLoggedIn,
-      };
-    });
-
-    return dataInfoUser;
-  } catch (error) {
-    handleError(error, LOG_FILE);
-    return error.message;
-  }
+  return dataInfoUser;
 };
 
 const getUserBy = (argv) => {
@@ -69,10 +61,6 @@ const getUserBy = (argv) => {
     }
 
     const dataUsers = getUsers();
-
-    if (typeof dataUsers === "string") {
-      throw new Error("GET-USER-BY REQUEST HAS FAILED");
-    }
 
     const foundUser = dataUsers.find(
       (user) =>
@@ -92,7 +80,7 @@ const getUserBy = (argv) => {
 
     return dataInfoUserShow;
   } catch (error) {
-    handleError(error, LOG_FILE);
+    handleError(error, ERROR_FILE);
     return error.message;
   }
 };
@@ -112,10 +100,6 @@ const addUser = (userData) => {
     }
 
     const dataUsers = getUsers();
-
-    if (typeof dataUsers === "string") {
-      throw new Error("ADD-USER REQUEST HAS FAILED");
-    }
 
     const foundUser = dataUsers.find(
       (user) => user.email.toLowerCase() === email.toLowerCase()
@@ -140,6 +124,8 @@ const addUser = (userData) => {
 
     writeFileSync(DATA_USERS, JSON.stringify(dataUsers));
 
+    handleError(new Error("NEW USER WAS CREATED"), LOG_FILE);
+
     return {
       id: newUser.id,
       firstName: newUser.firstName,
@@ -147,7 +133,7 @@ const addUser = (userData) => {
       email: newUser.email,
     };
   } catch (error) {
-    handleError(error, LOG_FILE);
+    handleError(error, ERROR_FILE);
     return error.message;
   }
 };
@@ -168,10 +154,6 @@ const updateUser = (userData) => {
     }
 
     const dataUsers = getUsers();
-
-    if (typeof dataUsers === "string") {
-      throw new Error("UPDATE-USER REQUEST HAS FAILED");
-    }
 
     const foundUser = dataUsers.find(
       (user) => user.id.toLowerCase() === dataUserFind.toLowerCase()
@@ -215,7 +197,7 @@ const updateUser = (userData) => {
       email: foundUser.email,
     };
   } catch (error) {
-    handleError(error, LOG_FILE);
+    handleError(error, ERROR_FILE);
     return error.message;
   }
 };
@@ -226,11 +208,13 @@ const changeStatusLoggIn = (email) => {
       throw new Error("EMAIL IS MISSING");
     }
 
-    const dataUsers = getUsers();
-
-    if (typeof dataUsers === "string") {
-      throw new Error("CHANGE-STATUS-LOGGIN REQUEST HAS FAILED");
+    if (!validateEmail(email)) {
+      throw new Error(
+        "EMAIL FORMAT INVALID, CHANGE-STATUS-LOGGIN REQUEST HAS FAILED"
+      );
     }
+
+    const dataUsers = getUsers();
 
     const foundUser = dataUsers.find(
       (user) =>
@@ -253,7 +237,7 @@ const changeStatusLoggIn = (email) => {
 
     return "STATUS LOGGIN CHANGED";
   } catch (error) {
-    handleError(error, LOG_FILE);
+    handleError(error, ERROR_FILE);
     return error.message;
   }
 };
@@ -267,11 +251,13 @@ const changePassword = (userData) => {
     const { email, currentPassword, newPassword } =
       createChangePasswordUserObject(userData); //destructuring
 
-    const dataUsers = getUsers();
-
-    if (typeof dataUsers === "string") {
-      throw new Error("CHANGE-PASSWORD REQUEST HAS FAILED");
+    if (!validateEmail(email)) {
+      throw new Error(
+        "EMAIL FORMAT INVALID, CHANGE-PASWWORD REQUEST HAS FAILED"
+      );
     }
+
+    const dataUsers = getUsers();
 
     const foundUser = dataUsers.find(
       (user) => user.email.toLowerCase() === email.toLowerCase()
@@ -295,7 +281,7 @@ const changePassword = (userData) => {
 
     return "PASSWORD CHANGE SUCCESSFULLY";
   } catch (error) {
-    handleError(error, LOG_FILE);
+    handleError(error, ERROR_FILE);
     return error.message;
   }
 };
@@ -308,11 +294,13 @@ const logIn = (userData) => {
 
     const { email, password } = createLoginUserObject(userData); //destructuring
 
-    const dataUsers = getUsers();
-
-    if (typeof dataUsers === "string") {
-      throw new Error("LOGIN REQUEST HAS FAILED");
+    if (!validateEmail(email)) {
+      throw new Error(
+        "EMAIL FORMAT INVALID, LOGIN REQUEST HAS FAILED"
+      );
     }
+
+    const dataUsers = getUsers();
 
     const foundUser = dataUsers.find(
       (user) => user.email.toLowerCase() === email.toLowerCase()
@@ -333,7 +321,7 @@ const logIn = (userData) => {
 
     return "LOGIN SUCCESS";
   } catch (error) {
-    handleError(error, LOG_FILE);
+    handleError(error, ERROR_FILE);
     return error.message;
   }
 };
@@ -345,10 +333,6 @@ const deleteUser = (argv) => {
     }
 
     const dataUsers = getUsers();
-
-    if (typeof dataUsers === "string") {
-      throw new Error("DELETE-USER REQUEST HAS FAILED");
-    }
 
     const foundUser = dataUsers.find(
       (user) =>
@@ -366,9 +350,11 @@ const deleteUser = (argv) => {
 
     writeFileSync(DATA_USERS, JSON.stringify(newDataUsers));
 
+    handleError(new Error("DELETE USER SUCCESS"), LOG_FILE);
+
     return foundUser;
   } catch (error) {
-    handleError(error, LOG_FILE);
+    handleError(error, ERROR_FILE);
     return error.message;
   }
 };

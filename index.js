@@ -2,7 +2,7 @@ import { getUsers, getInfoUsers, getUserBy, addUser, updateUser, changePassword,
 import 'dotenv/config';
 import { handleError } from "./utils/handleError.js";
 
-const LOG_FILE = process.env.LOG_FILE;
+const ERROR_FILE = process.env.ERROR_FILE;
 
 const args = process.argv.splice(2);
 
@@ -42,6 +42,6 @@ switch (input) {
         console.log(help());
     break;
     default:
-        handleError(new Error("INVALID FUNTION, USE HELP FOR MORE INFORMATION"), LOG_FILE);
+        handleError(new Error("INVALID FUNTION, USE HELP FOR MORE INFORMATION"), ERROR_FILE);
         console.log("INVALID FUNTION, USE HELP FOR MORE INFORMATION")
 }

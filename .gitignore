@@ -8,3 +8,4 @@ node_modules/
 # files
 data/users.json
 error/log.json
+error/error.json

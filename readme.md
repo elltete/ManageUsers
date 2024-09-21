@@ -1,6 +1,6 @@
 ## Aplicacion | Gestión de Usuarios
 
-Instalacion: ejecutar npm install, ya que se utiliza una libreria.
+Instalacion: ejecutar npm install, ya que se utiliza la libreria dotenv.
 
 A continuacion se detalla las funcionalidad que se implementaron, y como funcionan.
 
